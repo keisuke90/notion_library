@@ -45,6 +45,63 @@ module NotionLibrary
       selected_id = ask("Please select a book by entering the number:")
       return if selected_id.empty?
       puts "You selected: #{books[selected_id.to_i-1]["title"]}"
+
+      notion_endpoint = URI("https://api.notion.com/v1/pages")
+      notion_secret = ENV["NOTION_SECRET"]
+      notion_database_id = ENV["NOTION_DATABASE_ID"]
+      headers = {
+        "Authorization" => "Bearer #{notion_secret}",
+        "Content-Type" => "application/json",
+        "Notion-Version" => "2022-06-28"
+      }
+      body = {
+        "parent" => { "database_id" => notion_database_id },
+        "cover" => {
+          "external" => {
+            "url": books[selected_id.to_i-1]["largeImageUrl"]
+          }
+        },
+        "properties" => {
+          "Title": {
+            "title": [
+              {
+                "text": {
+                  "content": books[selected_id.to_i-1]["title"]
+                }
+              }
+            ]
+          },
+          "Author": {
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": books[selected_id.to_i-1]["author"]
+                }
+              }
+            ]
+          },
+          "Publisher": {
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": books[selected_id.to_i-1]["publisherName"]
+                }
+              }
+            ]
+          },
+          "ISBN": {
+            "number": books[selected_id.to_i-1]["isbn"].to_i
+          }
+        }
+      }.to_json
+      begin
+        response = Net::HTTP.post(notion_endpoint, body, headers)
+      rescue => exception
+        puts exception
+      end
+      puts response.body
     end
   end
 end
