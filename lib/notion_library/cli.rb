@@ -7,20 +7,18 @@ require "json"
 
 module NotionLibrary
   class CLI < Thor
-    desc "init", "Initializes Secret Key"
-    def init_notion_library
+    desc "init_secret", "Initializes Secret Key"
+    def init_secret
       Dotenv.load
 
-      puts <<~RUBY
-        Please enter your Rakuten App ID
-        If you do not want to change it, leave it blank and press enter.
-        Rakuten Web Service App ID: #{ENV["RAKUTEN_APP_ID"]}
-      RUBY
-      rakuten_app_id = ask("Please enter new Rakuten APP ID:")
-      rakuten_app_id = ENV["RAKUTEN_APP_ID"] if rakuten_app_id.empty?
+      rakuten_app_id = ask_secret("RAKUTEN_APP_ID")
+      notion_secret = ask_secret("NOTION_SECRET")
+      notion_database_id = ask_secret("NOTION_DATABASE_ID")
 
       File.open(File.join(__dir__, "../../.env"), "w") do |file|
         file.puts "RAKUTEN_APP_ID=#{rakuten_app_id}"
+        file.puts "NOTION_SECRET=#{notion_secret}"
+        file.puts "NOTION_DATABASE_ID=#{notion_database_id}"
       end
     end
 
@@ -103,6 +101,18 @@ module NotionLibrary
         puts e
       end
       puts response.body
+    end
+
+    private
+
+    def ask_secret(key)
+      puts <<~RUBY
+        Please enter your #{key}
+        If you do not want to change it, leave it blank and press enter.
+      RUBY
+      res = ask("Please enter new #{key}:")
+      res = ENV[key] if res.empty?
+      res
     end
   end
 end
