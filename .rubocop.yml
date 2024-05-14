@@ -14,3 +14,6 @@ Documentation:
 
 Style/FrozenStringLiteralComment:
   Enabled: false
+
+Metrics/MethodLength:
+  Max: 23
