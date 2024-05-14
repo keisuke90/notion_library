@@ -7,11 +7,6 @@ require "json"
 
 module NotionLibrary
   class CLI < Thor
-    desc "hello", "Prints 'Hello World!'"
-    def hello
-      puts "Hello World!"
-    end
-
     desc "init", "Initializes Secret Key"
     def init_notion_library
       Dotenv.load
