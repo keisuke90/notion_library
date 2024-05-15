@@ -52,7 +52,11 @@ module NotionLibrary
       # Notion APIを使って本を登録する
       puts "Registering the book..."
       registration_result = register_book(books[selected_id])
-      puts registration_result
+      if registration_result.code == "200"
+        puts "The book has been successfully registered."
+      else
+        puts "Failed to register the book."
+      end
     end
 
     private
