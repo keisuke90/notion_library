@@ -37,7 +37,7 @@ module NotionLibrary
       while selected_id.nil?
         books = JSON.parse(book_search_result.body)["Items"].map { |item| item["Item"] }
         books.each_with_index do |book, idx|
-          puts "[#{idx + 1}]【Title】#{book["title"]} 【Author】#{book["author"]} 【Publisher】#{book["publisherName"]}"
+          puts "[#{idx + 1}]#{book["title"]} / #{book["author"]} / #{book["publisherName"]}"
         end
         tmp_selected_id = ask("Please select a book by entering the number:")
         if tmp_selected_id.empty? || tmp_selected_id.to_i > books.size
