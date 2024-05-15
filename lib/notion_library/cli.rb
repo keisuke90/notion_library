@@ -23,84 +23,36 @@ module NotionLibrary
     end
 
     desc "register", "Register a book"
-    def register(keyword) # rubocop:disable all
+    def register # rubocop:disable Metrics/AbcSize
       Dotenv.load
-      base_url = "https://app.rakuten.co.jp/services/api/BooksTotal/Search/20170404?applicationId="
-      keyword = URI.encode_www_form_component(keyword)
-      url = URI("#{base_url}#{ENV["RAKUTEN_APP_ID"]}&keyword=#{keyword}")
-      res = Net::HTTP.get_response(url)
 
-      books = JSON.parse(res.body)["Items"].map { |item| item["Item"] }
-      books.each_with_index do |book, idx|
-        puts "[#{idx + 1}]---------------"
-        puts "Title: #{book["title"]}"
-        puts "Author: #{book["author"]}"
-        puts "Publisher: #{book["publisherName"]}"
-        puts "ISBN: #{book["isbn"]}"
-        puts "URL: #{book["largeImageUrl"]}"
+      # 本の検索
+      keyword = ask("Please enter a keyword to search:")
+      return if keyword.empty?
+
+      book_search_result = search_books(keyword)
+
+      # Notionに登録したい本の選択
+      selected_id = nil
+      while selected_id.nil?
+        books = JSON.parse(book_search_result.body)["Items"].map { |item| item["Item"] }
+        books.each_with_index do |book, idx|
+          puts "[#{idx + 1}]【Title】#{book["title"]} 【Author】#{book["author"]} 【Publisher】#{book["publisherName"]}"
+        end
+        tmp_selected_id = ask("Please select a book by entering the number:")
+        if tmp_selected_id.empty? || tmp_selected_id.to_i > books.size
+          puts "Wrong input. Please enter the number of the book you want to register."
+          return
+        end
+        puts "You selected: #{books[tmp_selected_id.to_i - 1]["title"]}"
+        ask = ask("Do you want to register this book? (y/n)")
+        selected_id = tmp_selected_id.to_i - 1 if %w[y yes].include?(ask.downcase)
       end
 
-      selected_id = ask("Please select a book by entering the number:")
-      return if selected_id.empty?
-
-      puts "You selected: #{books[selected_id.to_i - 1]["title"]}"
-
-      notion_endpoint = URI("https://api.notion.com/v1/pages")
-      notion_secret = ENV["NOTION_SECRET"]
-      notion_database_id = ENV["NOTION_DATABASE_ID"]
-      headers = {
-        "Authorization" => "Bearer #{notion_secret}",
-        "Content-Type" => "application/json",
-        "Notion-Version" => "2022-06-28"
-      }
-      body = {
-        "parent" => { "database_id" => notion_database_id },
-        "cover" => {
-          "external" => {
-            "url": books[selected_id.to_i - 1]["largeImageUrl"]
-          }
-        },
-        "properties" => {
-          "Title": {
-            "title": [
-              {
-                "text": {
-                  "content": books[selected_id.to_i - 1]["title"]
-                }
-              }
-            ]
-          },
-          "Author": {
-            "rich_text": [
-              {
-                "type": "text",
-                "text": {
-                  "content": books[selected_id.to_i - 1]["author"]
-                }
-              }
-            ]
-          },
-          "Publisher": {
-            "rich_text": [
-              {
-                "type": "text",
-                "text": {
-                  "content": books[selected_id.to_i - 1]["publisherName"]
-                }
-              }
-            ]
-          },
-          "ISBN": {
-            "number": books[selected_id.to_i - 1]["isbn"].to_i
-          }
-        }
-      }.to_json
-      begin
-        response = Net::HTTP.post(notion_endpoint, body, headers)
-      rescue StandardError => e
-        puts e
-      end
-      puts response.body
+      # Notion APIを使って本を登録する
+      puts "Registering the book..."
+      registration_result = register_book(books[selected_id])
+      puts registration_result
     end
 
     private
@@ -113,6 +65,74 @@ module NotionLibrary
       res = ask("Please enter new #{key}:")
       res = ENV[key] if res.empty?
       res
+    end
+
+    def search_books(keyword)
+      return unless keyword
+
+      base_url = "https://app.rakuten.co.jp/services/api/BooksTotal/Search/20170404?applicationId="
+      encoded_keyword = URI.encode_www_form_component(keyword)
+      url = URI("#{base_url}#{ENV["RAKUTEN_APP_ID"]}&keyword=#{encoded_keyword}")
+      Net::HTTP.get_response(url)
+    end
+
+    def register_book(book)
+      notion_endpoint = URI("https://api.notion.com/v1/pages")
+      notion_secret = ENV["NOTION_SECRET"]
+      notion_database_id = ENV["NOTION_DATABASE_ID"]
+      headers = {
+        "Authorization" => "Bearer #{notion_secret}",
+        "Content-Type" => "application/json",
+        "Notion-Version" => "2022-06-28"
+      }
+      body = {
+        "parent" => { "database_id" => notion_database_id },
+        "cover" => {
+          "external" => {
+            "url": book["largeImageUrl"]
+          }
+        },
+        "properties" => {
+          "Title": {
+            "title": [
+              {
+                "text": {
+                  "content": book["title"]
+                }
+              }
+            ]
+          },
+          "Author": {
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": book["author"]
+                }
+              }
+            ]
+          },
+          "Publisher": {
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": book["publisherName"]
+                }
+              }
+            ]
+          },
+          "ISBN": {
+            "number": book["isbn"].to_i
+          }
+        }
+      }.to_json
+      begin
+        response = Net::HTTP.post(notion_endpoint, body, headers)
+      rescue StandardError => e
+        puts e
+      end
+      response
     end
   end
 end

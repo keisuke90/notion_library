@@ -15,5 +15,14 @@ Documentation:
 Style/FrozenStringLiteralComment:
   Enabled: false
 
+Style/AsciiComments:
+  Enabled: false
+
 Metrics/MethodLength:
-  Max: 23
+  Max: 60
+
+Metrics/ClassLength:
+  Max: 200
+
+Metrics/CyclomaticComplexity:
+  Max: 10
