@@ -1,4 +1,5 @@
 require "notion_library"
+require "notion_library/kindle/client"
 require "thor"
 require "dotenv"
 require "uri"
@@ -57,6 +58,11 @@ module NotionLibrary
       else
         puts "Failed to register the book."
       end
+    end
+
+    desc "kindle", "Kindle"
+    def kindle
+      client = Kindle::Client.new
     end
 
     private
