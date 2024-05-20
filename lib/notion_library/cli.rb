@@ -15,11 +15,15 @@ module NotionLibrary
       rakuten_app_id = ask_secret("RAKUTEN_APP_ID")
       notion_secret = ask_secret("NOTION_SECRET")
       notion_database_id = ask_secret("NOTION_DATABASE_ID")
+      amazon_email = ask_secret("AMAZON_EMAIL")
+      amazon_password = ask_secret("AMAZON_PASSWORD")
 
       File.open(File.join(__dir__, "../../.env"), "w") do |file|
         file.puts "RAKUTEN_APP_ID=#{rakuten_app_id}"
         file.puts "NOTION_SECRET=#{notion_secret}"
         file.puts "NOTION_DATABASE_ID=#{notion_database_id}"
+        file.puts "AMAZON_EMAIL=#{amazon_email}"
+        file.puts "AMAZON_PASSWORD=#{amazon_password}"
       end
     end
 
