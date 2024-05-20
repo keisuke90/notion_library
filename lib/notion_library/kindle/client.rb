@@ -5,7 +5,7 @@ module Kindle
     class AuthenticationError < StandardError; end
     class CaptchaError < StandardError; end
 
-    attr_accessor :email, :password, :url, :logged_in
+    attr_accessor :email, :password, :url, :logged_in, :logged_in_page
 
     def initialize
       Dotenv.load
@@ -13,10 +13,25 @@ module Kindle
       @password = ENV["AMAZON_PASSWORD"]
       @url = 'https://read.amazon.co.jp/notebook'
       @logged_in = false
+      @logged_in_page = nil
+    end
+
+    def get_hilights
     end
 
     def books
-      @books ||= fetch_books
+      @books ||= parse_books
+    end
+
+    def parse_books
+      login
+      return unless @logged_in
+      @logged_in_page.search("div#kp-notebook-library").children.map do |book|
+        {
+          asin: book.attributes["id"]&.value,
+          title: book.children.search("h2")&.first&.text,
+        }
+      end.compact
     end
 
     def login
@@ -27,6 +42,7 @@ module Kindle
       res = mechanize_client.submit(form)
 
       if res.search(".kp-notebook-title").any?
+        @logged_in_page = res
         @logged_in = true
       else
         raise AuthenticationError, "ログインに失敗しました。"
