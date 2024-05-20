@@ -16,7 +16,17 @@ module Kindle
       @logged_in_page = nil
     end
 
-    def get_hilights
+    def get_highlights(asin)
+      login unless @logged_in
+      mechanize_client.get("#{@url}?captcha_verified=1&asin=#{asin}&contentLimitState=&")
+                      .search("div#kp-notebook-annotations")
+                      .children
+                      .select { |child| child.name == "div" }
+                      .select { |child| child.children.search("div.kp-notebook-highlight").first }
+                      .map    { |html_elements| {
+                        location: html_elements.children.search("div.kp-notebook-highlight").first.text,
+                        text: html_elements.search("input#kp-annotation-location").first.attributes["value"].value
+                      } }
     end
 
     def books
@@ -24,8 +34,7 @@ module Kindle
     end
 
     def parse_books
-      login
-      return unless @logged_in
+      login unless @logged_in
       @logged_in_page.search("div#kp-notebook-library").children.map do |book|
         {
           asin: book.attributes["id"]&.value,
