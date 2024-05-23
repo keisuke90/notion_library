@@ -2,18 +2,12 @@ module Notion
   class Client
     def initialize
       Dotenv.load
-      @url = "https://api.notion.com/v1/pages"
       @notion_secret = ENV["NOTION_SECRET"]
       @notion_database_id = ENV["NOTION_DATABASE_ID"]
     end
 
     def register_book(book)
-      notion_endpoint = URI.parse(@url)
-      headers = {
-        "Authorization" => "Bearer #{@notion_secret}",
-        "Content-Type" => "application/json",
-        "Notion-Version" => "2022-06-28"
-      }
+      notion_endpoint = URI.parse("https://api.notion.com/v1/pages")
       body = {
         "parent" => { "database_id" => @notion_database_id },
         "cover" => {
@@ -62,6 +56,30 @@ module Notion
         puts e
       end
       response
+    end
+
+    def register_highlights(asin, highlights)
+      notion_endpoint = URI.parse("https://api.notion.com/v1/databases/#{@notion_database_id}/query")
+      body = {
+        "filter": {
+          "property": "ASIN",
+          "rich_text": {
+            "equals": asin
+          }
+        }
+      }.to_json
+      response = Net::HTTP.post(notion_endpoint, body, headers)
+      page_id = JSON.parse(response.body)["results"][0]["id"]
+    end
+
+    private
+
+    def headers
+      {
+        "Authorization" => "Bearer #{@notion_secret}",
+        "Content-Type" => "application/json",
+        "Notion-Version" => "2022-06-28"
+      }
     end
   end
 end

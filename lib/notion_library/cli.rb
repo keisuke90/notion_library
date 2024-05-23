@@ -48,9 +48,16 @@ module NotionLibrary
       end
     end
 
-    desc "kindle", "Kindle"
-    def kindle
-      client = Kindle::Client.new
+    desc "highlight", "Get highlights from Kindle"
+    def highlight
+      target_asin = ask("Please enter the ASIN of the book you want to get highlights from:")
+      highlights = Kindle::Client.new.get_highlights(target_asin)
+      result = Notion::Client.new.register_highlights(target_asin, highlights)
+      if result.code == "200"
+        puts "The highlights have been successfully registered."
+      else
+        puts "Failed to register the highlights."
+      end
     end
 
     private
@@ -93,3 +100,4 @@ module NotionLibrary
     end
   end
 end
+
