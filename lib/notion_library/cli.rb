@@ -58,7 +58,6 @@ module NotionLibrary
       asin = ask("Please enter the ASIN of the book you want to get highlights from:")
       highlights = kindle_client.get_highlights(asin)
       result = notion_client.register_highlights(asin, highlights)
-      binding.irb
       if result.code == "200"
         puts "The highlights have been successfully registered."
       else
