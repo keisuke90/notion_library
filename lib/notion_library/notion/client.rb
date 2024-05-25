@@ -10,44 +10,12 @@ module Notion
       notion_endpoint = URI.parse("https://api.notion.com/v1/pages")
       body = {
         "parent" => { "database_id" => @notion_database_id },
-        "cover" => {
-          "external" => {
-            "url": book["largeImageUrl"]
-          }
-        },
+        "cover" => cover(book["largeImageUrl"]),
         "properties" => {
-          "Title": {
-            "title": [
-              {
-                "text": {
-                  "content": book["title"]
-                }
-              }
-            ]
-          },
-          "Author": {
-            "rich_text": [
-              {
-                "type": "text",
-                "text": {
-                  "content": book["author"]
-                }
-              }
-            ]
-          },
-          "Publisher": {
-            "rich_text": [
-              {
-                "type": "text",
-                "text": {
-                  "content": book["publisherName"]
-                }
-              }
-            ]
-          },
-          "ISBN": {
-            "number": book["isbn"].to_i
-          }
+          "Title": title_property(book["title"]),
+          "Author": text_property(book["author"]),
+          "Publisher": text_property(book["publisherName"]),
+          "ISBN": number_property(book["isbn"])
         }
       }.to_json
       begin
@@ -93,6 +61,45 @@ module Notion
         "Authorization" => "Bearer #{@notion_secret}",
         "Content-Type" => "application/json",
         "Notion-Version" => "2022-06-28"
+      }
+    end
+
+    def cover(url)
+      {
+        "external" => {
+          "url": url
+        }
+      }
+    end
+
+    def title_property(title)
+      {
+        "title": [
+          {
+            "text": {
+              "content": title
+            }
+          }
+        ]
+      }
+    end
+
+    def text_property(text)
+      {
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": text
+            }
+          }
+        ]
+      }
+    end
+
+    def number_property(number)
+      {
+        "number": number.to_i
       }
     end
 
