@@ -24,8 +24,8 @@ module Kindle
                       .select { |child| child.name == "div" }
                       .select { |child| child.children.search("div.kp-notebook-highlight").first }
                       .map    { |html_elements| {
-                        location: html_elements.children.search("div.kp-notebook-highlight").first.text,
-                        text: html_elements.search("input#kp-annotation-location").first.attributes["value"].value
+                        location: html_elements.search("input#kp-annotation-location").first.attributes["value"].value,
+                        text: html_elements.children.search("div.kp-notebook-highlight").first.text
                       } }
     end
 

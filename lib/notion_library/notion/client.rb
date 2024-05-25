@@ -70,6 +70,20 @@ module Notion
       }.to_json
       response = Net::HTTP.post(notion_endpoint, body, headers)
       page_id = JSON.parse(response.body)["results"][0]["id"]
+
+      notion_endpoint = URI.parse("https://api.notion.com/v1/blocks/#{page_id}/children")
+      blocks = []
+      highlights.each do |highlight|
+        blocks << text_block(highlight[:location])
+        blocks << quote_block(highlight[:text])
+        blocks << divider_block
+      end
+      body = { "children": blocks }.to_json
+      http = Net::HTTP.new(notion_endpoint.host, notion_endpoint.port)
+      http.use_ssl = true
+      request = Net::HTTP::Patch.new(notion_endpoint, headers)
+      request.body = body
+      response = http.request(request)
     end
 
     private
@@ -79,6 +93,48 @@ module Notion
         "Authorization" => "Bearer #{@notion_secret}",
         "Content-Type" => "application/json",
         "Notion-Version" => "2022-06-28"
+      }
+    end
+
+    def text_block(location)
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Page.#{location}"
+              }
+            }
+          ]
+        }
+      }
+    end
+
+    def quote_block(text)
+      {
+        "object": "block",
+        "type": "quote",
+        "quote": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "#{text}",
+              }
+            }
+          ]
+        }
+      }
+    end
+
+    def divider_block
+      {
+        "object": "block",
+        "type": "divider",
+        "divider": {}
       }
     end
   end
