@@ -31,6 +31,7 @@ module NotionLibrary
     desc "register", "Register a book"
     def register # rubocop:disable Metrics/AbcSize
       Dotenv.load
+      notion_client = Notion::Client.new(ENV["NOTION_SECRET"], ENV["NOTION_DATABASE_ID"])
 
       keyword = ask("Please enter a keyword to search:")
       return if keyword.empty?
@@ -40,7 +41,7 @@ module NotionLibrary
       selected_id = ask_target_book(books)
 
       puts "Registering the book..."
-      registration_result = Notion::Client.new.register_book(books[selected_id])
+      registration_result = notion_client.register_book(books[selected_id])
       if registration_result.code == "200"
         puts "The book has been successfully registered."
       else
@@ -50,9 +51,13 @@ module NotionLibrary
 
     desc "highlight", "Get highlights from Kindle"
     def highlight
+      Dotenv.load
+      kindle_client = Kindle::Client.new(ENV["AMAZON_EMAIL"], ENV["AMAZON_PASSWORD"])
+      notion_client = Notion::Client.new(ENV["NOTION_SECRET"], ENV["NOTION_DATABASE_ID"])
+
       target_asin = ask("Please enter the ASIN of the book you want to get highlights from:")
-      highlights = Kindle::Client.new.get_highlights(target_asin)
-      result = Notion::Client.new.register_highlights(target_asin, highlights)
+      highlights = kindle_client.get_highlights(target_asin)
+      result = notion_client.register_highlights(target_asin, highlights)
       if result.code == "200"
         puts "The highlights have been successfully registered."
       else

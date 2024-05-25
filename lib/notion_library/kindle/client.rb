@@ -7,10 +7,9 @@ module Kindle
 
     attr_accessor :email, :password, :url, :logged_in, :logged_in_page
 
-    def initialize
-      Dotenv.load
-      @email = ENV["AMAZON_EMAIL"]
-      @password = ENV["AMAZON_PASSWORD"]
+    def initialize(email, password)
+      @email = email
+      @password = password
       @url = 'https://read.amazon.co.jp/notebook'
       @logged_in = false
       @logged_in_page = nil

@@ -1,9 +1,8 @@
 module Notion
   class Client
-    def initialize
-      Dotenv.load
-      @notion_secret = ENV["NOTION_SECRET"]
-      @notion_database_id = ENV["NOTION_DATABASE_ID"]
+    def initialize(secret, database_id)
+      @notion_secret = secret
+      @notion_database_id = database_id
     end
 
     def register_book(book)
