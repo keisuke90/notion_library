@@ -42,6 +42,8 @@ module Kindle
       end.compact
     end
 
+    private
+
     def login
       signin_page = mechanize_client.get(url)
       form = signin_page.form("signIn")
