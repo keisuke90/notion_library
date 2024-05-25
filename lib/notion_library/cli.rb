@@ -41,11 +41,11 @@ module NotionLibrary
       selected_id = ask_target_book(books)
 
       puts "Registering the book..."
-      registration_result = notion_client.register_book(books[selected_id])
-      if registration_result.code == "200"
+      result = notion_client.register_book(books[selected_id])
+      if result.code == "200"
         puts "The book has been successfully registered."
       else
-        puts "Failed to register the book."
+        puts "Failed to register the book. #{result.body}"
       end
     end
 
@@ -55,13 +55,14 @@ module NotionLibrary
       kindle_client = Kindle::Client.new(ENV["AMAZON_EMAIL"], ENV["AMAZON_PASSWORD"])
       notion_client = Notion::Client.new(ENV["NOTION_SECRET"], ENV["NOTION_DATABASE_ID"])
 
-      target_asin = ask("Please enter the ASIN of the book you want to get highlights from:")
-      highlights = kindle_client.get_highlights(target_asin)
-      result = notion_client.register_highlights(target_asin, highlights)
+      asin = ask("Please enter the ASIN of the book you want to get highlights from:")
+      highlights = kindle_client.get_highlights(asin)
+      result = notion_client.register_highlights(asin, highlights)
+      binding.irb
       if result.code == "200"
         puts "The highlights have been successfully registered."
       else
-        puts "Failed to register the highlights."
+        puts "Failed to register the highlights. #{result.body}"
       end
     end
 
