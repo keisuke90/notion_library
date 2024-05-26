@@ -1,39 +1,74 @@
 # NotionLibrary
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/notion_library`. To experiment with that code, run `bin/console` for an interactive prompt.
+![image](https://github.com/keisuke90/notion_library/assets/79405582/c2b86483-d981-4b29-a3fd-7c9a7442a8db)
 
-TODO: Delete this and the text above, and describe your gem
+NotionLibrary は Notion に読書記録をつけるための CLI です。
 
-## Installation
+## 機能
 
-Add this line to your application's Gemfile:
+1. Notion のデータベースに読んだ本を登録する
 
-```ruby
-gem 'notion_library'
+![image](https://github.com/keisuke90/notion_library/assets/79405582/08a68d3c-ada6-40ec-9ad7-af06885515d9)
+
+2. Kindle のハイライトを取得する
+
+![image](https://github.com/keisuke90/notion_library/assets/79405582/788ff9f1-81d8-40b4-b708-867da52be6b8)
+
+## インストール方法
+
+gem として公開していないため、本リポジトリをローカルに clone するか、Github からインストールしてください。
+
+Github からインストールする方法
+
+```bash
+gem install specific_install
+gem specific_install -l https://github.com/keisuke90/notion_library
 ```
 
-And then execute:
+## 準備
 
-    $ bundle install
+1. Notion のデータベース作成
 
-Or install it yourself as:
+   データベースを作成し、次のプロパティを設定してください。
 
-    $ gem install notion_library
+   ```
+   - Title(title)
+   - Author(text)
+   - Publisher(text)
+   - ISBN(number)
+   - ASIN(text)
+   ```
 
-## Usage
+2. 環境変数の登録
 
-TODO: Write usage instructions here
+   次のコマンドで環境変数を登録します。
 
-## Development
+   ```bash
+   notion_library init_secret
+   ```
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+   以下の入力が必要になります。
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+   ```
+    RAKUTEN_APP_ID = 楽天ウェブサービスのアプリID
+    NOTION_SECRET = Notionのインテグレーションシークレット
+    NOTION_DATABASE_ID = NotionのデータベースID
+    AMAZON_EMAIL = Amazonログイン用メールアドレス
+    AMAZON_PASSWORD = Amazonログイン用のパスワード
+   ```
 
-## Contributing
+## 使い方
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/notion_library.
+1. 本を登録する
 
-## License
+   ```
+   notion_library register
+   ```
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+2. ハイライトを取得する
+
+   ※Amazon の商品ページから ASIN を確認し、ASIN プロパティへの入力が必要です。
+
+   ```
+   notion_library highlight
+   ```
