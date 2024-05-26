@@ -11,7 +11,8 @@ module NotionLibrary
   class CLI < Thor
     desc "init_secret", "Initializes Secret Key"
     def init_secret
-      Dotenv.load
+      env_path = File.expand_path(File.join(__dir__, "../../.env"))
+      Dotenv.load(env_path)
 
       rakuten_app_id = ask_secret("RAKUTEN_APP_ID")
       notion_secret = ask_secret("NOTION_SECRET")
@@ -30,7 +31,9 @@ module NotionLibrary
 
     desc "register", "Register a book"
     def register # rubocop:disable Metrics/AbcSize
-      Dotenv.load
+      env_path = File.expand_path(File.join(__dir__, "../../.env"))
+      Dotenv.load(env_path)
+
       notion_client = Notion::Client.new(ENV["NOTION_SECRET"], ENV["NOTION_DATABASE_ID"])
 
       keyword = ask("Please enter a keyword to search:")
@@ -51,7 +54,9 @@ module NotionLibrary
 
     desc "highlight", "Get highlights from Kindle"
     def highlight
-      Dotenv.load
+      env_path = File.expand_path(File.join(__dir__, "../../.env"))
+      Dotenv.load(env_path)
+
       kindle_client = Kindle::Client.new(ENV["AMAZON_EMAIL"], ENV["AMAZON_PASSWORD"])
       notion_client = Notion::Client.new(ENV["NOTION_SECRET"], ENV["NOTION_DATABASE_ID"])
 
